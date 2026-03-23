@@ -17,6 +17,8 @@ jobs:
       - name: Create zip
         run: |
           mkdir -p out
+          mkdir -p RCLootCouncil_wowaudit
+          cp -r Data Modules Utils Media core.lua RCLootCouncil_wowaudit.toc RCLootCouncil_wowaudit/
           cd ..
           zip -r RCLootCouncil_wowaudit/out/RCLootCouncil_wowaudit.zip RCLootCouncil_wowaudit/ \
             --exclude "RCLootCouncil_wowaudit/.git/*" \
