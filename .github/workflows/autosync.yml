@@ -1,0 +1,46 @@
+name: Auto Sync and Release
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # runs every day at 8am UTC
+  workflow_dispatch:      # also lets you trigger it manually
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_WITH_WORKFLOW_SCOPE }}
+
+      - name: Sync from upstream
+        id: sync
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git remote add upstream https://github.com/wowaudit/RCLootCouncil_wowaudit.git
+          git fetch upstream
+          BEHIND=$(git rev-list HEAD..upstream/main --count)
+          echo "behind=$BEHIND" >> $GITHUB_OUTPUT
+          if [ "$BEHIND" -gt "0" ]; then
+            git merge upstream/main --no-edit
+            git push origin main
+          fi
+
+      - name: Create new release tag
+        if: steps.sync.outputs.behind > 0
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          LATEST=$(git tag --sort=-v:refname | head -n1)
+          if [ -z "$LATEST" ]; then
+            NEWTAG="v1.0.0"
+          else
+            NEWTAG=$(echo $LATEST | awk -F. '{$NF = $NF + 1; print}' OFS=.)
+          fi
+          git tag $NEWTAG
+          git push origin $NEWTAG
