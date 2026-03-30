@@ -16,11 +16,12 @@ jobs:
 
       - name: Create zip
         run: |
+          TAG=${GITHUB_REF#refs/tags/}
           mkdir -p out
           mkdir -p RCLootCouncil_wowaudit
           cp -r Data Modules Utils Media core.lua RCLootCouncil_wowaudit.toc RCLootCouncil_wowaudit/
           cd ..
-          zip -r RCLootCouncil_wowaudit/out/RCLootCouncil_wowaudit.zip RCLootCouncil_wowaudit/ \
+          zip -r RCLootCouncil_wowaudit/out/RCLootCouncil_wowaudit-$TAG.zip RCLootCouncil_wowaudit/ \
             --exclude "RCLootCouncil_wowaudit/.git/*" \
             --exclude "RCLootCouncil_wowaudit/.github/*" \
             --exclude "RCLootCouncil_wowaudit/out/*"
@@ -28,4 +29,4 @@ jobs:
       - name: Upload release
         uses: softprops/action-gh-release@v2
         with:
-          files: out/RCLootCouncil_wowaudit.zip
+          files: out/RCLootCouncil_wowaudit-*.zip
